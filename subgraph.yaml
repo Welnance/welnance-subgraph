@@ -1,0 +1,80 @@
+specVersion: 0.0.2
+description: Welnance is an open-source protocol for algorithmic, efficient Money Markets on the BSC blockchain.
+repository: https://github.com/WelnanceProtocol/welnance-subgraph
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Comptroller
+    network: bsc
+    source:
+      address: "0xdc21c1dAF3277f07fFA6EB09fCD3E07EDc36DC0A"
+      abi: Comptroller
+      startBlock: 13128054
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscripts
+      file: ./src/mappings/comptroller.ts
+      entities:
+        - Comptroller
+        - Market
+      abis:
+        - name: Comptroller
+          file: ./abis/comptroller.json
+        - name: WLToken
+          file: ./abis/wltoken.json
+        - name: PriceOracle
+          file: ./abis/priceOracle.json
+        - name: BEP20
+          file: ./abis/WBep20.json
+      eventHandlers:
+        - event: MarketListed(address)
+          handler: handleMarketListed
+        - event: MarketEntered(address,address)
+          handler: handleMarketEntered
+        - event: MarketExited(address,address)
+          handler: handleMarketExited
+        - event: NewCollateralFactor(address,uint256,uint256)
+          handler: handleNewCollateralFactor
+        - event: NewPriceOracle(address,address)
+          handler: handleNewPriceOracle
+templates:
+  - name: WLToken
+    kind: ethereum/contract
+    network: bsc
+    source:
+      abi: WLToken
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/wltoken.ts
+      entities:
+        - User
+        - Market
+        - WLTokenInfo
+      abis:
+        - name: WLToken
+          file: ./abis/wltoken.json
+        - name: PriceOracle
+          file: ./abis/priceOracle.json
+        - name: BEP20
+          file: ./abis/WBep20.json
+      eventHandlers:
+        - event: Mint(address,uint256,uint256)
+          handler: handleMint
+        - event: Redeem(address,uint256,uint256)
+          handler: handleRedeem
+        - event: Borrow(address,uint256,uint256,uint256)
+          handler: handleBorrow
+        - event: RepayBorrow(address,address,uint256,uint256,uint256)
+          handler: handleRepayBorrow
+        - event: LiquidateBorrow(address,address,uint256,address,uint256)
+          handler: handleLiquidateBorrow
+        - event: NewReserveFactor(uint256,uint256)
+          handler: handleNewReserveFactor
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: NewMarketInterestRateModel(address,address)
+          handler: handleNewMarketInterestRateModel
